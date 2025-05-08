@@ -1,0 +1,48 @@
+body.bg-beige {
+  background-color: #f8f1e7;
+  font-family: 'Inter', sans-serif;
+  color: #3c2f2f;
+}
+
+.text-brown {
+  color: #d2611c;
+}
+
+.bg-brown {
+  background-color: #d2611c;
+}
+
+.text-beige {
+  color: #f8f1e7;
+}
+
+.text-shadow {
+  text-shadow: 1px 1px 2px #6b3e07;
+}
+
+img.object-cover {
+  object-fit: cover;
+}
+
+/* Кнопки с коричневым */
+.btn-brown {
+  background-color: #d2611c;
+  border: none;
+  color: #f8f1e7;
+}
+
+.btn-brown:hover, .btn-brown:focus {
+  background-color: #b25315;
+  color: #fff;
+}
+
+.btn-outline-brown {
+  color: #d2611c;
+  border-color: #d2611c;
+}
+
+.btn-outline-brown:hover {
+  background-color: #d2611c;
+  color: #fff;
+  border-color: #d2611c;
+}

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Личный кабинет — Богородские сухари{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold mb-4">Личный кабинет</h2>
+
+<p><strong>Имя:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
+
+<a href="{% url 'users:logout' %}" class="btn btn-outline-brown rounded-pill px-3 mt-3">Выйти</a>
+{% endblock %}

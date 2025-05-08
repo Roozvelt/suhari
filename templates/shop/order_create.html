@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Оформление заказа — Богородские сухари{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold mb-4">Оформление заказа</h2>
+
+<form method="post" class="mb-5" style="max-width: 500px;">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+  <button type="submit" class="btn btn-warning rounded-pill px-4 mt-3">Подтвердить заказ</button>
+</form>
+
+<a href="{% url 'shop:cart_detail' %}" class="btn btn-outline-brown rounded-pill px-3">← Вернуться в корзину</a>
+{% endblock %}

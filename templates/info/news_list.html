@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Новости — Богородские сухари{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold mb-4">Новости</h2>
+
+{% for news_item in news %}
+  <article class="mb-4 p-3 border rounded-3 bg-beige shadow-sm">
+    <h4 class="fw-semibold">{{ news_item.title }}</h4>
+    <time datetime="{{ news_item.created_at|date:'Y-m-d' }}" class="text-muted small">{{ news_item.created_at|date:"d.m.Y" }}</time>
+    <p class="mt-2">{{ news_item.content|linebreaksbr }}</p>
+  </article>
+{% empty %}
+  <p>Новостей пока нет.</p>
+{% endfor %}
+
+{% endblock %}
