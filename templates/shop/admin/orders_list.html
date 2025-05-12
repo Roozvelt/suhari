@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Управление заказами — Богородские сухари{% endblock %}
+{% block content %}
+<h1>Заказы</h1>
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th><th>Пользователь</th><th>Дата</th><th>Статус</th><th>Сумма</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td>{{ order.pk }}</td>
+      <td>{{ order.user.username }}</td>
+      <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+      <td>{{ order.get_status_display }}</td>
+      <td>{{ order.total_price }} ₽</td>
+      <td><a href="{% url 'shop:order_detail' order.pk %}">Подробнее</a></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6">Заказов пока нет.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

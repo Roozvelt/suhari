@@ -4,6 +4,14 @@
 {% block content %}
 <h2 class="fw-bold mb-4">Ваша корзина</h2>
 
+{% if auth_required %}
+<div class="alert alert-warning">
+    Для оформления заказа необходимо
+    <a href="{% url 'users:login' %}?next={% url 'shop:cart_detail' %}">войти</a> или
+    <a href="{% url 'users:register' %}?next={% url 'shop:cart_detail' %}">зарегистрироваться</a>
+</div>
+{% endif %}
+
 {% if cart_items %}
 <table class="table table-bordered">
   <thead class="table-light">
@@ -18,12 +26,30 @@
   <tbody>
     {% for item in cart_items %}
     <tr>
-      <td>{{ item.product.name }}</td>
-      <td>{{ item.quantity }}</td>
-      <td>{{ item.product.price_per_unit }} ₽</td>
-      <td>{{ item.total_price }} ₽</td>
       <td>
-        <form method="post" action="{% url 'shop:cart_remove' item.product.pk %}">
+        {% if item.product %}
+          {{ item.product.name }}
+        {% else %}
+          Товар удалён
+        {% endif %}
+      </td>
+      <td>{{ item.quantity }}</td>
+      <td>
+        {% if item.product %}
+          {{ item.product.price }} ₽
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td>
+        {% if item.product %}
+          {{ item.get_total_price }} ₽
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td>
+        <form method="post" action="{% url 'shop:item_remove' item.product.pk %}">
           {% csrf_token %}
           <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
         </form>
@@ -34,8 +60,12 @@
 </table>
 
 <div class="d-flex justify-content-between align-items-center">
-  <h4>Итого: {{ cart_total_price }} ₽</h4>
-  <a href="{% url 'shop:order_create' %}" class="btn btn-warning rounded-pill px-4">Оформить заказ</a>
+  <h4>Итого: {{ total_price }} ₽</h4>
+  {% if not auth_required %}
+    <a href="{% url 'shop:order_create' %}" class="btn btn-warning rounded-pill px-4">Оформить заказ</a>
+  {% else %}
+    <button class="btn btn-secondary rounded-pill px-4" disabled>Оформить заказ</button>
+  {% endif %}
 </div>
 {% else %}
 <p>Корзина пуста.</p>

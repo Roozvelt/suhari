@@ -2,14 +2,66 @@
 {% block title %}Оформление заказа — Богородские сухари{% endblock %}
 
 {% block content %}
-<h2 class="fw-bold mb-4">Оформление заказа</h2>
+    <h2 class="fw-bold mb-4">Оформление заказа</h2>
 
-<form method="post" class="mb-5" style="max-width: 500px;">
-  {% csrf_token %}
-  {{ form.as_p }}
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post" id="payment-form">
+                {% csrf_token %}
 
-  <button type="submit" class="btn btn-warning rounded-pill px-4 mt-3">Подтвердить заказ</button>
-</form>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Способ оплаты</h4>
+                        {{ form.payment_method }}
+                    </div>
+                </div>
 
-<a href="{% url 'shop:cart_detail' %}" class="btn btn-outline-brown rounded-pill px-3">← Вернуться в корзину</a>
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Детали доставки</h4>
+                        {{ form.delivery_type }}
+                        {{ form.address }}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-brown rounded-pill px-4 mt-4">Подтвердить заказ</button>
+            </form>
+        </div>
+
+        <div class="col-md-6" id="payment-iframe-container" style="display: none;">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">Оплата картой</h4>
+                    <div id="payment-iframe"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a href="{% url 'shop:cart_detail' %}" class="btn btn-outline-brown rounded-pill px-3">← Вернуться в корзину</a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const paymentMethod = document.querySelector('[name="payment_method"]');
+            const iframeContainer = document.getElementById('payment-iframe-container');
+
+            paymentMethod.addEventListener('change', function (e) {
+                if (e.target.value === 'card') {
+                    iframeContainer.style.display = 'block';
+                    loadYooKassaWidget();
+                } else {
+                    iframeContainer.style.display = 'none';
+                }
+            });
+
+            function loadYooKassaWidget() {
+                const iframe = document.createElement('iframe');
+                iframe.src = "{{ payment_url }}";
+                iframe.style.width = '100%';
+                iframe.style.height = '400px';
+                iframe.frameBorder = '0';
+                document.getElementById('payment-iframe').appendChild(iframe);
+            }
+        });
+    </script>
 {% endblock %}

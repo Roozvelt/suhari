@@ -46,3 +46,36 @@ img.object-cover {
   color: #fff;
   border-color: #d2611c;
 }
+
+.quantity-selector input {
+    border-left: 0;
+    border-right: 0;
+    -moz-appearance: textfield;
+}
+
+.quantity-selector input::-webkit-outer-spin-button,
+.quantity-selector input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.quantity-selector .btn {
+    width: 40px;
+}
+
+.bg-beige { background-color: #f5f1e9; }
+.text-brown { color: #6C3D0F; }
+.btn-brown {
+    background-color: #6C3D0F;
+    color: white;
+    border-color: #6C3D0F;
+}
+.btn-outline-brown {
+    border-color: #6C3D0F;
+    color: #6C3D0F;
+}
+.btn-brown:hover {
+    background-color: #5a3210;
+    border-color: #5a3210;
+}
+.object-fit-cover { object-fit: cover; }

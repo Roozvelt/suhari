@@ -1,66 +1,137 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" itemscope itemtype="http://schema.org/WebSite">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}Богородские сухари{% endblock %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="{% block meta_description %}Богородские сухари - традиционные хлебные изделия ручной работы{% endblock %}">
+    <meta name="keywords" content="сухари, снеки, богородские продукты">
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <title>{% block title %}Богородские сухари{% endblock %}</title>
 
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+    <!-- Preload Resources -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style">
+    <link rel="preload" href="{% static 'css/style.css' %}" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter&display=swap" as="style"
+          onload="this.rel='stylesheet'">
 
-  <!-- Кастомный CSS -->
-  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- Fallback for fonts when JS disabled -->
+    <noscript>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&display=swap">
+    </noscript>
+
+    {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-beige text-dark">
 
-<header class="container py-4">
-  <nav class="d-flex justify-content-between align-items-center" aria-label="Основное меню">
-    <a href="{% url 'info:index' %}" class="text-decoration-none fw-bold fs-3 text-brown">Богородские сухари</a>
-    <div>
-      <a href="{% url 'shop:product_list' %}" class="btn btn-link text-brown fw-semibold me-3">Каталог</a>
-      <a href="{% url 'info:organization_info' %}" class="btn btn-link text-brown fw-semibold me-3">О компании</a>
-      <a href="{% url 'info:news_list' %}" class="btn btn-link text-brown fw-semibold me-3">Новости</a>
-      <a href="{% url 'shop:cart_detail' %}" class="btn btn-outline-brown rounded-pill px-3 me-3">
-        <i class="bi bi-cart"></i> Корзина
-      </a>
-      {% if user.is_authenticated %}
-        <div class="btn-group">
-          <button type="button" class="btn btn-outline-brown dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-person-circle"></i> {{ user.username }}
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="{% url 'users:profile' %}">Личный кабинет</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{% url 'users:logout' %}">Выйти</a></li>
-          </ul>
+<body class="bg-beige text-dark d-flex flex-column min-vh-100">
+<header class="container py-3">
+    <nav class="navbar navbar-expand-lg" aria-label="Основная навигация">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold fs-3 text-brown" href="{% url 'info:index' %}" itemprop="url">
+                <span itemprop="name">Богородские сухари</span>
+            </a>
+
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#mainNav"
+                    aria-controls="mainNav"
+                    aria-expanded="false"
+                    aria-label="Переключить навигацию">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNav">
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <a href="{% url 'shop:product_list' %}" class="nav-link text-brown fw-semibold">Каталог</a>
+                    <a href="{% url 'info:organization_info' %}" class="nav-link text-brown fw-semibold">О компании</a>
+                    <a href="{% url 'info:news_list' %}" class="nav-link text-brown fw-semibold">Новости</a>
+
+                    <a href="{% url 'shop:cart_detail' %}"
+                       class="btn btn-outline-brown rounded-pill px-3 position-relative"
+                       itemscope
+                       itemtype="http://schema.org/Basket">
+                        <i class="bi bi-cart" aria-hidden="true"></i>
+                        {% with cart_item_count=request.user.cart.items.count %}
+                            {% if cart_item_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {{ cart_item_count }}
+                  <span class="visually-hidden">товаров в корзине</span>
+                </span>
+                            {% endif %}
+                        {% endwith %}
+                        <span class="visually-hidden" itemprop="itemCount">{{ cart_item_count }}</span>
+                        Корзина
+                    </a>
+
+                    {% if user.is_authenticated %}
+                        <div class="btn-group" role="group" aria-label="Меню пользователя">
+                            <button type="button"
+                                    class="btn btn-outline-brown dropdown-toggle rounded-pill"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                    aria-label="Управление аккаунтом">
+                                <i class="bi bi-person-circle" aria-hidden="true"></i>
+                                {{ user.username }}
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">Личный кабинет</a></li>
+                                <li><a href="{% url 'shop:orders' %}" class="dropdown-item">
+                                    {% if user.is_staff %}
+                                        Управление заказами
+                                    {% else %}
+                                        Мои заказы
+                                    {% endif %}
+                                </a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">Выйти</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'users:login' %}" class="btn btn-outline-brown rounded-pill px-3">Вход</a>
+                            <a href="{% url 'users:register' %}" class="btn btn-brown rounded-pill px-3">Регистрация</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-      {% else %}
-        <a href="{% url 'users:login' %}" class="btn btn-outline-brown rounded-pill px-3 me-2">Вход</a>
-        <a href="{% url 'users:register' %}" class="btn btn-brown rounded-pill px-3">Регистрация</a>
-      {% endif %}
-    </div>
-  </nav>
+    </nav>
 </header>
 
-<main class="container mb-5" role="main">
-  {% block content %}{% endblock %}
+<main class="container my-5 flex-grow-1" role="main">
+    {% block content %}{% endblock %}
 </main>
 
-<footer class="bg-brown text-beige py-4">
-  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
-    <div>&copy; 2024 Богородские сухари</div>
-    <div>Контакты: <a href="tel:88005553535" class="text-beige text-decoration-none">8 800 555-35-35</a></div>
-  </div>
+<footer class="bg-brown text-beige py-3 mt-auto">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <div>&copy; 2025 Богородские сухари</div>
+    </div>
 </footer>
 
 <!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        defer
+        async></script>
+
+{% block extra_js %}
+    <script src="{% static 'scripts/cart.js' %}"></script>
+    <script src="{% static 'scripts/phone.js' %}"></script>
+{% endblock %}
+
 </body>
 </html>

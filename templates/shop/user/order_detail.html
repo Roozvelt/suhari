@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Заказ #{{ order.pk }} — Богородские сухари{% endblock %}
+{% block content %}
+<h1>Заказ #{{ order.pk }}</h1>
+
+<p><strong>Пользователь:</strong> {{ order.user.username }}</p>
+<p><strong>email:</strong> {{ order.user.email }}</p>
+<p><strong>Дата оформления:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</p>
+<p><strong>Телефон:</strong> {{ order.contact_phone }}</p>
+<p><strong>Адрес:</strong> {{ order.contact_address }}</p>
+
+<h3>Товары</h3>
+<table class="table mb-4">
+  <thead>
+    <tr><th>Товар</th><th>Количество</th><th>Цена за шт.</th><th>Сумма</th></tr>
+  </thead>
+  <tbody>
+    {% for item in order.items.all %}
+    <tr>
+      <td>{{ item.product.name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>{{ item.price }} ₽</td>
+      <td>{{ item.get_total_price }} ₽</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<h3>ИТОГО: {{ order.total_price }} ₽</h3>
+<h3>Статус заказа {{ order.get_status_display }}</h3>
+
+<a href="{% url 'shop:orders' %}">← Назад к списку заказов</a>
+{% endblock %}

@@ -2,3 +2,4 @@ Django>=4.2
 pillow
 django-crispy-forms
 python-dotenv
+yookassa~=3.5.0

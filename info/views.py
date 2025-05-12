@@ -1,4 +1,6 @@
 from django.shortcuts import render
+
+from shop.models import Product
 from .models import OrganizationInfo, News
 
 def organization_info(request):
@@ -10,4 +12,5 @@ def news_list(request):
     return render(request, 'info/news_list.html', {'news': news})
 
 def index(request):
-    return render(request, 'index.html')
+    products = Product.objects.all()
+    return render(request, 'index.html', {'products': products})

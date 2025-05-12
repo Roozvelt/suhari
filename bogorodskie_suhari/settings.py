@@ -127,3 +127,8 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'login'
+
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
+
+YOOKASSA_SHOP_ID = 'ваш_shop_id'
+YOOKASSA_SECRET_KEY = 'ваш_секретный_ключ'

@@ -9,14 +9,30 @@
   <div class="col-md-6">
     <h2 class="fw-bold mb-3">{{ product.name }}</h2>
     <p class="mb-3">{{ product.description }}</p>
-    <p class="fs-4 fw-bold">{{ product.price_per_unit }} ₽ за упаковку</p>
+    <p class="fs-4 fw-bold">{{ product.price }} ₽ за упаковку {{ product.weight }} гр.</p>
 
-    <form method="post" action="{% url 'shop:add_to_cart' product.pk %}">
-      {% csrf_token %}
-      <div class="input-group mb-3" style="max-width: 140px;">
-        <input type="number" name="quantity" value="1" min="1" class="form-control" />
-        <button type="submit" class="btn btn-warning rounded-pill">В корзину</button>
-      </div>
+    <form action="{% url 'shop:add_to_cart' product.id %}" method="post" class="d-flex align-items-center gap-2">
+        {% csrf_token %}
+
+        <div class="input-group quantity-selector" style="max-width: 120px;">
+            <button class="btn btn-outline-secondary minus-btn" type="button">-</button>
+            <input type="number"
+                   name="quantity"
+                   value="1"
+                   min="1"
+                   max="99"
+                   class="form-control text-center"
+                   aria-label="Количество">
+            <button class="btn btn-outline-secondary plus-btn" type="button">+</button>
+        </div>
+
+        <button type="submit" class="btn btn-brown">
+            {% if product in cart_items %}
+                Обновить
+            {% else %}
+                В корзину
+            {% endif %}
+        </button>
     </form>
   </div>
 </div>
