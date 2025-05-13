@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Оформление заказа — Богородские сухари{% endblock %}
+
+{% block content %}
+    <h2 class="fw-bold mb-4">Оплата заказа</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post" id="paym-form">
+                {% csrf_token %}
+                <div id="element"></div>
+            </form>
+        </div>
+        <script src="https://widget.cloudpayments.ru/bundles/paymentblocks.js"></script>
+        <script>
+            var domElement = document.getElementById('element');
+
+            var element = new cp.PaymentBlocks({
+                publicId: 'test_api_00000000000000000000002',
+                description: 'Оплата товаров',
+                amount: {{ order.total_price }},
+                currency: 'RUB',
+                invoiceId: 1234567,
+                accountId: 'user@example.com',
+                email: null,
+                debug: true,
+            });
+
+            element.mount(domElement);
+
+            element.on("destroy", () => {
+                console.log("destroy");
+            });
+
+            element.on("success", (result) => {
+                console.log("success", result);
+            });
+
+            element.on("fail", (result) => {
+                console.log("fail", result);
+            });
+        </script>
+{% endblock %}

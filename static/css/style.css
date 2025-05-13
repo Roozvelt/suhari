@@ -79,3 +79,46 @@ img.object-cover {
     border-color: #5a3210;
 }
 .object-fit-cover { object-fit: cover; }
+
+/* Адаптивное меню */
+.navbar-nav {
+    margin-top: 1rem;
+}
+
+@media (min-width: 992px) {
+    .navbar-nav {
+        margin-top: 0;
+    }
+}
+
+/* Компактные кнопки на мобильных */
+.btn-rounded {
+    border-radius: 50px;
+}
+
+/* Адаптивное отображение текста */
+.navbar-brand {
+    font-size: calc(1rem + 0.5vw);
+}
+
+/* Иконки меню */
+.nav-link i {
+    margin-right: 0.3rem;
+}
+
+/* Выпадающее меню профиля */
+.dropdown-menu {
+    min-width: 200px;
+}
+
+/* Корзина на мобильных */
+@media (max-width: 576px) {
+    .position-relative {
+        margin-right: 0.5rem;
+    }
+
+    .badge {
+        font-size: 0.6rem;
+        padding: 0.35em 0.65em;
+    }
+}

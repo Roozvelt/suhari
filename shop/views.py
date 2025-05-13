@@ -1,26 +1,25 @@
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views.decorators.csrf import csrf_exempt
-from .models import Product, CartItem, Order, OrderItem
-from .forms import OrderCreateForm, OrderStatusUpdateForm
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.urls import reverse
-from yookassa import Configuration, Payment
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
+from yookassa import Configuration
 
-
+from .forms import OrderCreateForm, OrderStatusUpdateForm
+from .models import Product, CartItem, Order, OrderItem
 
 Configuration.account_id = settings.YOOKASSA_SHOP_ID
 Configuration.secret_key = settings.YOOKASSA_SECRET_KEY
+
 
 def product_list(request):
     products = Product.objects.all()
     return render(request, 'shop/product_list.html', {'products': products})
 
+
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
     return render(request, 'shop/product_detail.html', {'product': product})
+
 
 def get_session_cart(request):
     cart = request.session.get('cart', {})
@@ -28,9 +27,11 @@ def get_session_cart(request):
         cart = {}
     return cart
 
+
 def save_session_cart(request, cart):
     request.session['cart'] = cart
     request.session.modified = True
+
 
 def transfer_cart(request, user):
     session_cart = get_session_cart(request)
@@ -47,6 +48,7 @@ def transfer_cart(request, user):
                 cart_item.save()
         request.session['cart'] = {}
         save_session_cart(request, {})
+
 
 def add_to_cart(request, pk):
     product = get_object_or_404(Product, pk=pk)
@@ -71,6 +73,7 @@ def add_to_cart(request, pk):
     messages.success(request, f'Добавлено {product.name} в корзину.')
     return redirect('shop:product_list')
 
+
 @login_required
 def item_remove(request, pk):
     product = get_object_or_404(Product, pk=pk)
@@ -85,6 +88,7 @@ def item_remove(request, pk):
 
     messages.success(request, f'{product.name} удалён из корзины.')
     return redirect('shop:cart_detail')
+
 
 def cart_detail(request):
     if request.user.is_authenticated:
@@ -112,6 +116,7 @@ def cart_detail(request):
         'auth_required': not request.user.is_authenticated
     }
     return render(request, 'shop/cart_detail.html', context)
+
 
 @login_required
 def order_create(request):
@@ -142,32 +147,15 @@ def order_create(request):
                 order_price += item.get_total_price()
             order.total_price = order_price
             order.save()
-
-            # Генерация платежной ссылки
-            payment = Payment.create({
-                "amount": {
-                    "value": str(order.total_price),
-                    "currency": "RUB"
-                },
-                "confirmation": {
-                    "type": "redirect",
-                    "return_url": request.build_absolute_uri(
-                        reverse('shop:payment_success', args=[order.id]))
-                },
-                "capture": True,
-                "description": f"Оплата заказа №{order.id}"
-            })
-
-            return render(request, 'shop/order_create.html', {
-                'form': form,
-                'payment_url': payment.confirmation.confirmation_url
-            })
+            if order.payment_type == 'card':
+                return render(request, 'shop/order_pay.html', {'order': order, 'form': form})
             cart_items.delete()  # Очистка корзины после заказа
             messages.success(request, f'Заказ #{order.id} успешно создан')
             return redirect('shop:product_list')
     else:
         form = OrderCreateForm()
     return render(request, 'shop/order_create.html', {'form': form})
+
 
 @login_required
 def orders_list(request):
@@ -177,6 +165,7 @@ def orders_list(request):
         return render(request, 'shop/admin/orders_list.html', {'orders': orders})
     orders = Order.objects.filter(user=user).order_by('-created_at')
     return render(request, 'shop/user/orders_list.html', {'orders': orders, 'is_admin': False})
+
 
 @login_required
 def order_detail(request, pk):
@@ -195,6 +184,7 @@ def order_detail(request, pk):
         order = get_object_or_404(Order, pk=pk)
         return render(request, 'shop/user/order_detail.html', {'order': order, 'is_admin': False})
 
+
 @login_required
 def cancel_order(request, pk):
     order = get_object_or_404(Order, pk=pk, user=request.user)
@@ -202,69 +192,3 @@ def cancel_order(request, pk):
         order.status = 'canceled'
         order.save()
     return redirect('shop:orders')
-
-
-@login_required
-def create_payment(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-
-    if order.is_paid:
-        messages.warning(request, 'Заказ уже оплачен')
-        return redirect('shop:order_detail', pk=order_id)
-
-    return_url = request.build_absolute_uri(
-        reverse('shop:payment_success', args=[order_id])
-    )
-
-    payment = Payment.create({
-        "amount": {
-            "value": str(order.total_price),
-            "currency": "RUB"
-        },
-        "confirmation": {
-            "type": "redirect",
-            "return_url": return_url
-        },
-        "capture": True,
-        "description": f"Оплата заказа №{order.id}",
-        "metadata": {
-            "order_id": order.id
-        }
-    })
-
-    order.payment_id = payment.id
-    order.save()
-
-    return redirect(payment.confirmation.confirmation_url)
-
-
-@login_required
-def payment_success(request, order_id):
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-
-    payment = Payment.find_one(order.payment_id)
-    if payment.status == 'succeeded':
-        order.is_paid = True
-        order.save()
-        messages.success(request, 'Оплата прошла успешно!')
-    else:
-        messages.error(request, 'Ошибка оплаты. Попробуйте снова.')
-
-    return redirect('shop:order_detail', pk=order_id)
-
-
-@csrf_exempt
-def yookassa_webhook(request):
-    event_json = json.loads(request.body)
-    payment = event_json['object']
-
-    try:
-        order = Order.objects.get(payment_id=payment['id'])
-        if payment['status'] == 'succeeded' and not order.is_paid:
-            order.is_paid = True
-            order.save()
-            # Дополнительные действия при успешной оплате
-    except Order.DoesNotExist:
-        pass
-
-    return HttpResponse(status=200)

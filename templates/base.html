@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="ru" itemscope itemtype="http://schema.org/WebSite">
 <head>
+    <!-- Метатеги остаются без изменений -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description"
@@ -37,13 +38,15 @@
 </head>
 
 <body class="bg-beige text-dark d-flex flex-column min-vh-100">
-<header class="container py-3">
-    <nav class="navbar navbar-expand-lg" aria-label="Основная навигация">
-        <div class="container-fluid">
+<header class="container-fluid px-0">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white py-3 shadow-sm">
+        <div class="container">
+            <!-- Логотип -->
             <a class="navbar-brand fw-bold fs-3 text-brown" href="{% url 'info:index' %}" itemprop="url">
                 <span itemprop="name">Богородские сухари</span>
             </a>
 
+            <!-- Гамбургер-меню -->
             <button class="navbar-toggler" type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#mainNav"
@@ -53,58 +56,73 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
+            <!-- Основное меню -->
             <div class="collapse navbar-collapse" id="mainNav">
-                <div class="ms-auto d-flex align-items-center gap-3">
-                    <a href="{% url 'shop:product_list' %}" class="nav-link text-brown fw-semibold">Каталог</a>
-                    <a href="{% url 'info:organization_info' %}" class="nav-link text-brown fw-semibold">О компании</a>
-                    <a href="{% url 'info:news_list' %}" class="nav-link text-brown fw-semibold">Новости</a>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link text-brown fw-semibold" href="{% url 'shop:product_list' %}">Каталог</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-brown fw-semibold" href="{% url 'info:organization_info' %}">О компании</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-brown fw-semibold" href="{% url 'info:news_list' %}">Новости</a>
+                    </li>
+                </ul>
 
-                    <a href="{% url 'shop:cart_detail' %}"
-                       class="btn btn-outline-brown rounded-pill px-3 position-relative"
-                       itemscope
-                       itemtype="http://schema.org/Basket">
-                        <i class="bi bi-cart" aria-hidden="true"></i>
+                <!-- Правая часть меню -->
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Корзина -->
+                    <div class="position-relative">
+                        <a href="{% url 'shop:cart_detail' %}"
+                           class="btn btn-outline-brown rounded-pill px-3"
+                           role="button"
+                           itemscope
+                           itemtype="http://schema.org/Basket">
+                            <i class="bi bi-cart" aria-hidden="true"></i>
+                            <span class="visually-hidden" itemprop="itemCount">
+                                {% with cart_item_count=request.user.cart.items.count %}
+                                    {{ cart_item_count }}
+                                {% endwith %}
+                            </span>
+                            <span class="d-none d-md-inline">Корзина</span>
+                        </a>
                         {% with cart_item_count=request.user.cart.items.count %}
                             {% if cart_item_count > 0 %}
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  {{ cart_item_count }}
-                  <span class="visually-hidden">товаров в корзине</span>
-                </span>
+                                    {{ cart_item_count }}
+                                    <span class="visually-hidden">товаров в корзине</span>
+                                </span>
                             {% endif %}
                         {% endwith %}
-                        <span class="visually-hidden" itemprop="itemCount">{{ cart_item_count }}</span>
-                        Корзина
-                    </a>
+                    </div>
 
+                    <!-- Авторизация/Профиль -->
                     {% if user.is_authenticated %}
-                        <div class="btn-group" role="group" aria-label="Меню пользователя">
-                            <button type="button"
-                                    class="btn btn-outline-brown dropdown-toggle rounded-pill"
+                        <div class="dropdown">
+                            <button class="btn btn-outline-brown dropdown-toggle rounded-pill"
+                                    type="button"
+                                    id="userMenu"
                                     data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                    aria-label="Управление аккаунтом">
-                                <i class="bi bi-person-circle" aria-hidden="true"></i>
-                                {{ user.username }}
+                                    aria-expanded="false">
+                                <i class="bi bi-person-circle me-1"></i>
+                                <span class="d-none d-lg-inline">{{ user.username|truncatechars:12 }}</span>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                                 <li><a class="dropdown-item" href="{% url 'users:profile' %}">Личный кабинет</a></li>
-                                <li><a href="{% url 'shop:orders' %}" class="dropdown-item">
-                                    {% if user.is_staff %}
-                                        Управление заказами
-                                    {% else %}
-                                        Мои заказы
-                                    {% endif %}
+                                <li><a class="dropdown-item" href="{% url 'shop:orders' %}">
+                                    {% if user.is_staff %}Управление заказами{% else %}Мои заказы{% endif %}
                                 </a></li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">Выйти</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'users:logout' %}">Выйти</a></li>
                             </ul>
                         </div>
                     {% else %}
                         <div class="d-flex gap-2">
-                            <a href="{% url 'users:login' %}" class="btn btn-outline-brown rounded-pill px-3">Вход</a>
-                            <a href="{% url 'users:register' %}" class="btn btn-brown rounded-pill px-3">Регистрация</a>
+                            <a href="{% url 'users:login' %}"
+                               class="btn btn-outline-brown rounded-pill px-3">Вход</a>
+                            <a href="{% url 'users:register' %}"
+                               class="btn btn-brown rounded-pill px-3 d-none d-md-block">Регистрация</a>
                         </div>
                     {% endif %}
                 </div>

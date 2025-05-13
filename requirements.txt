@@ -3,3 +3,4 @@ pillow
 django-crispy-forms
 python-dotenv
 yookassa~=3.5.0
+cloudpayments~=1.6.3
